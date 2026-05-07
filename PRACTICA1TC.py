@@ -1,14 +1,3 @@
-"""
-Teoría Formal de Lenguajes — Aplicación Flet
-Ejercicio 1: Subcadenas/Prefijos/Sufijos + Cerradura de Kleene/Positiva
-
-Requisitos:
-    pip install flet
-
-Ejecución:
-    python lenguajes_formales.py
-"""
-
 import flet as ft
 from itertools import product as iproduct
 
