@@ -190,14 +190,20 @@ TEXT     = "#E6EDF3"
 TEXT2    = "#8B949E"
 FONT     = "Courier New"
 
+# --- NUEVA FUNCIÓN PARA REEMPLAZAR ft.border.all ---
+def border_all(width: float, color: str):
+    side = ft.BorderSide(width, color)
+    return ft.Border(top=side, right=side, bottom=side, left=side)
 
 def chip(label: str, color: str = ACCENT) -> ft.Container:
     return ft.Container(
         content=ft.Text(label, size=11, color=color, font_family=FONT, weight=ft.FontWeight.BOLD),
         bgcolor=f"{color}22",
-        border=ft.border.all(1, color),
+        # REPARADO:
+        border=border_all(1, color),
         border_radius=4,
-        padding=ft.padding.symmetric(horizontal=8, vertical=3),
+        # REPARADO:
+        padding=ft.Padding(left=8, right=8, top=3, bottom=3),
     )
 
 
@@ -353,8 +359,9 @@ def main(page: ft.Page):
         ], spacing=12),
         divider(),
         section_title("► TABLA DE TRANSICIONES"),
+        # REPARADO:
         ft.Container(transition_table_container, padding=8, bgcolor=SURFACE,
-                     border=ft.border.all(1, BORDER), border_radius=8),
+                     border=border_all(1, BORDER), border_radius=8),
     ], spacing=10, scroll=ft.ScrollMode.AUTO, expand=True)
 
     # ═══════════════════════════════════════════
@@ -463,7 +470,8 @@ def main(page: ft.Page):
                 ft.Row([ft.Text(f'"{string}"  →  {symbol}',
                                color=color, font_family=FONT, size=16, weight=ft.FontWeight.BOLD)],
                        alignment="center"),
-                bgcolor=f"{color}15", border=ft.border.all(2, color),
+                # REPARADO:
+                bgcolor=f"{color}15", border=border_all(2, color),
                 border_radius=8, padding=12,
             )
         )
@@ -516,7 +524,8 @@ def main(page: ft.Page):
                 ft.Row([ft.Text(f'"{string}"  →  Paso {last["step"]}  |  {status_text}',
                                color=color, font_family=FONT, size=14, weight=ft.FontWeight.BOLD)],
                        alignment="center"),
-                bgcolor=f"{color}15", border=ft.border.all(1, color),
+                # REPARADO:
+                bgcolor=f"{color}15", border=border_all(1, color),
                 border_radius=8, padding=10,
             )
         )
@@ -556,8 +565,9 @@ def main(page: ft.Page):
                               style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=6))),
         ], spacing=10, wrap=True),
         divider(),
+        # REPARADO:
         ft.Container(sim_result_container, padding=10, bgcolor=SURFACE,
-                     border=ft.border.all(1, BORDER), border_radius=8,
+                     border=border_all(1, BORDER), border_radius=8,
                      expand=True),
     ], spacing=10, expand=True)
 
@@ -639,8 +649,9 @@ def main(page: ft.Page):
             chips_row = ft.Row(
                 [ft.Container(
                     ft.Text(f'"{i}"' if i else '""', color=color, font_family=FONT, size=11),
-                    bgcolor=f"{color}18", border=ft.border.all(1, color),
-                    border_radius=4, padding=ft.padding.symmetric(horizontal=6, vertical=2)
+                    # REPARADO:
+                    bgcolor=f"{color}18", border=border_all(1, color),
+                    border_radius=4, padding=ft.Padding(left=6, right=6, top=2, bottom=2)
                 ) for i in items],
                 wrap=True, spacing=6, run_spacing=6
             )
@@ -682,8 +693,9 @@ def main(page: ft.Page):
                               style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=6))),
         ], spacing=10, wrap=True),
         divider(),
+        # REPARADO:
         ft.Container(str_ops_result, padding=10, bgcolor=SURFACE,
-                     border=ft.border.all(1, BORDER), border_radius=8,
+                     border=border_all(1, BORDER), border_radius=8,
                      expand=True),
     ], spacing=10, expand=True, scroll=ft.ScrollMode.AUTO)
 
@@ -731,8 +743,9 @@ def main(page: ft.Page):
         chips = ft.Row(
             [ft.Container(
                 ft.Text(f'"{w}"' if w else '""', color=TEXT, font_family=FONT, size=11),
-                bgcolor=SURFACE2, border=ft.border.all(1, BORDER),
-                border_radius=4, padding=ft.padding.symmetric(horizontal=6, vertical=2)
+                # REPARADO:
+                bgcolor=SURFACE2, border=border_all(1, BORDER),
+                border_radius=4, padding=ft.Padding(left=6, right=6, top=2, bottom=2)
             ) for w in result],
             wrap=True, spacing=6, run_spacing=6
         )
@@ -776,8 +789,9 @@ def main(page: ft.Page):
                               style=ft.ButtonStyle(shape=ft.RoundedRectangleBorder(radius=6))),
         ], spacing=12, wrap=True),
         divider(),
+        # REPARADO:
         ft.Container(kleene_result, padding=10, bgcolor=SURFACE,
-                     border=ft.border.all(1, BORDER), border_radius=8,
+                     border=border_all(1, BORDER), border_radius=8,
                      expand=True),
     ], spacing=10, expand=True, scroll=ft.ScrollMode.AUTO)
 
@@ -856,14 +870,16 @@ def main(page: ft.Page):
             ft.Text("ESCOM · IPN · Teoría de la Computación",
                     color=TEXT2, font_family=FONT, size=11),
         ], alignment="start"),
-        bgcolor=SURFACE, padding=ft.padding.symmetric(horizontal=20, vertical=12),
-        border=ft.border.only(bottom=ft.BorderSide(1, BORDER)),
+        # REPARADO:
+        bgcolor=SURFACE, padding=ft.Padding(left=20, right=20, top=12, bottom=12),
+        border=ft.Border(bottom=ft.BorderSide(1, BORDER)),
     )
 
     nav_bar = ft.Container(
         ft.Row(tab_buttons, spacing=6, wrap=True),
-        bgcolor=SURFACE, padding=ft.padding.symmetric(horizontal=16, vertical=8),
-        border=ft.border.only(bottom=ft.BorderSide(1, BORDER)),
+        # REPARADO:
+        bgcolor=SURFACE, padding=ft.Padding(left=16, right=16, top=8, bottom=8),
+        border=ft.Border(bottom=ft.BorderSide(1, BORDER)),
     )
 
     sidebar = ft.Container(
@@ -873,14 +889,16 @@ def main(page: ft.Page):
             afd_info_panel,
         ], spacing=8),
         width=200, bgcolor=SURFACE,
-        border=ft.border.only(right=ft.BorderSide(1, BORDER)),
-        padding=ft.padding.all(12),
+        # REPARADO:
+        border=ft.Border(right=ft.BorderSide(1, BORDER)),
+        padding=12,
     )
 
     status_bar = ft.Container(
         ft.Text("Listo.", ref=status_bar_text, color=TEXT2, font_family=FONT, size=11),
-        bgcolor=SURFACE, padding=ft.padding.symmetric(horizontal=16, vertical=6),
-        border=ft.border.only(top=ft.BorderSide(1, BORDER)),
+        # REPARADO:
+        bgcolor=SURFACE, padding=ft.Padding(left=16, right=16, top=6, bottom=6),
+        border=ft.Border(top=ft.BorderSide(1, BORDER)),
     )
 
     body = ft.Row([
@@ -897,4 +915,5 @@ def main(page: ft.Page):
         ], spacing=0, expand=True)
     )
 
-ft.app(target=main)
+# REPARADO:
+ft.run(main)

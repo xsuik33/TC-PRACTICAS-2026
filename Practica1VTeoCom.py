@@ -61,13 +61,17 @@ AZUL     = "#61dafb"
 YUPI     = "🥳"
 FIREWORKS = "🎆🎇✨"
 
+# --- NUEVA FUNCIÓN PARA REEMPLAZAR ft.border.all ---
+def border_all(width: float, color: str):
+    side = ft.BorderSide(width, color)
+    return ft.Border(top=side, right=side, bottom=side, left=side)
+
 def chip(text: str, color: str, bg: str) -> ft.Container:
     return ft.Container(
         content=ft.Text(text, font_family="monospace", size=13, color=color),
         bgcolor=bg,
-        #border=ft.border.all(1, color + "44"),
         border_radius=6,
-        padding=ft.padding.symmetric(horizontal=10, vertical=5),
+        padding=ft.Padding(left=10, right=10, top=5, bottom=5),
     )
 
 
@@ -82,16 +86,16 @@ def section_card(title: str, color: str, chips: list[ft.Control], count: int) ->
                                     color=color, weight="bold"),
                             ft.Container(
                                 content=ft.Text(str(count), font_family="monospace",
-                                                size=10),#, color=color),
+                                                size=10),
                                 bgcolor=color + "18",
                                 border_radius=100,
-                                padding=ft.padding.symmetric(horizontal=9, vertical=3),
+                                padding=ft.Padding(left=9, right=9, top=3, bottom=3),
                             ),
                         ],
                         alignment="spaceBetween",
                     ),
-                    padding=ft.padding.symmetric(horizontal=16, vertical=12),
-                    border=ft.border.only(bottom=ft.border.BorderSide(1, BORDER)),
+                    padding=ft.Padding(left=16, right=16, top=12, bottom=12),
+                    border=ft.Border(bottom=ft.BorderSide(1, BORDER)),
                 ),
                 ft.Container(
                     content=ft.Row(chips, wrap=True, spacing=8),
@@ -101,7 +105,8 @@ def section_card(title: str, color: str, chips: list[ft.Control], count: int) ->
             spacing=0,
         ),
         bgcolor=CARD,
-        border=ft.border.all(1, BORDER),
+        # REPARADO AQUÍ
+        border=border_all(1, BORDER),
         border_radius=12,
     )
 
@@ -196,7 +201,8 @@ def build_tab_subcadenas(page: ft.Page) -> ft.Control:
                         size=12, color=TEXT_DIM, font_family="monospace",
                     ),
                     bgcolor=NEON + "08",
-                    border=ft.border.all(1, NEON + "22"),
+                    # REPARADO AQUÍ
+                    border=border_all(1, NEON + "22"),
                     border_radius=8,
                     padding=12,
                 ),
@@ -224,8 +230,6 @@ def build_tab_subcadenas(page: ft.Page) -> ft.Control:
                 ft.ElevatedButton(
                     "CALCULAR",
                     on_click=compute,
-                    #bgcolor=NEON,
-                    #color="#000",
                     style=ft.ButtonStyle(
                         shape=ft.RoundedRectangleBorder(radius=8),
                         side=ft.BorderSide(1, NEON),
@@ -253,7 +257,8 @@ def build_tab_subcadenas(page: ft.Page) -> ft.Control:
             spacing=16,
         ),
         bgcolor=CARD,
-        border=ft.border.all(1, BORDER),
+        # REPARADO AQUÍ
+        border=border_all(1, BORDER),
         border_radius=12,
         padding=24,
         width=360,
@@ -318,7 +323,7 @@ def build_tab_kleene(page: ft.Page) -> ft.Control:
 
     def _run(kind: str):
         raw = alpha_field.value.replace(" ", "")
-        chars = list(dict.fromkeys(raw))   # deduplicate, preserve order
+        chars = list(dict.fromkeys(raw))   
         if not chars:
             return
         try:
@@ -354,16 +359,16 @@ def build_tab_kleene(page: ft.Page) -> ft.Control:
                                 color=color, weight="bold"),
                         ft.Container(
                             content=ft.Text(f"{len(data):,}", font_family="monospace",
-                                            size=10),# color=color),
+                                            size=10),
                             bgcolor=color + "18",
                             border_radius=100,
-                            padding=ft.padding.symmetric(horizontal=9, vertical=3),
+                            padding=ft.Padding(left=9, right=9, top=3, bottom=3),
                         ),
                     ],
                     alignment="spaceBetween",
                 ),
-                padding=ft.padding.symmetric(horizontal=16, vertical=12),
-                border=ft.border.only(bottom=ft.border.BorderSide(1, BORDER)),
+                padding=ft.Padding(left=16, right=16, top=12, bottom=12),
+                border=ft.Border(bottom=ft.BorderSide(1, BORDER)),
             ),
             ft.Container(
                 content=ft.Row(chips, wrap=True, spacing=8),
@@ -378,8 +383,8 @@ def build_tab_kleene(page: ft.Page) -> ft.Control:
                         f"⚠  Mostrando {DISPLAY_LIMIT:,} de {len(data):,} — exporta para ver todas",
                         font_family="monospace", size=11, color=PINK,
                     ),
-                    padding=ft.padding.symmetric(horizontal=16, vertical=8),
-                    border=ft.border.only(top=ft.border.BorderSide(1, BORDER)),
+                    padding=ft.Padding(left=16, right=16, top=8, bottom=8),
+                    border=ft.Border(top=ft.BorderSide(1, BORDER)),
                 )
             )
 
@@ -388,7 +393,8 @@ def build_tab_kleene(page: ft.Page) -> ft.Control:
             ft.Container(
                 content=ft.Column(controls, spacing=0),
                 bgcolor=CARD,
-                border=ft.border.all(1, BORDER),
+                # REPARADO AQUÍ
+                border=border_all(1, BORDER),
                 border_radius=12,
             )
         )
@@ -422,11 +428,12 @@ def build_tab_kleene(page: ft.Page) -> ft.Control:
                         color=PURPLE, weight="bold"),
                 ft.Container(
                     content=ft.Text(
-                        "Σ*  incluye la cadena vacía  ε\nΣ+  excluye la cadena vacía",
+                        "Σ* incluye la cadena vacía  ε\nΣ+  excluye la cadena vacía",
                         size=12, color=TEXT_DIM, font_family="monospace",
                     ),
                     bgcolor=NEON + "08",
-                    border=ft.border.all(1, NEON + "22"),
+                    # REPARADO AQUÍ
+                    border=border_all(1, NEON + "22"),
                     border_radius=8,
                     padding=12,
                 ),
@@ -446,8 +453,6 @@ def build_tab_kleene(page: ft.Page) -> ft.Control:
                 ft.ElevatedButton(
                     "KLEENE  Σ*",
                     on_click=lambda e: _run("star"),
-                   # bgcolor=NEON,
-                   # color="#000",
                     style=ft.ButtonStyle(
                         shape=ft.RoundedRectangleBorder(radius=8),
                         side=ft.BorderSide(1, NEON),
@@ -488,7 +493,8 @@ def build_tab_kleene(page: ft.Page) -> ft.Control:
             spacing=16,
         ),
         bgcolor=CARD,
-        border=ft.border.all(1, BORDER),
+        # REPARADO AQUÍ
+        border=border_all(1, BORDER),
         border_radius=12,
         padding=24,
         width=360,
@@ -541,8 +547,8 @@ def main(page: ft.Page):
             spacing=14,
         ),
         bgcolor=BG,
-        border=ft.border.only(bottom=ft.border.BorderSide(1, BORDER)),
-        padding=ft.padding.symmetric(horizontal=36, vertical=22),
+        border=ft.Border(bottom=ft.BorderSide(1, BORDER)),
+        padding=ft.Padding(left=36, right=36, top=22, bottom=22),
     )
 
     # Tabs
@@ -551,7 +557,7 @@ def main(page: ft.Page):
 
     content_container = ft.Container(
         content=tab_sub,
-        padding=ft.padding.symmetric(horizontal=36, vertical=32),
+        padding=ft.Padding(left=36, right=36, top=32, bottom=32),
         expand=True,
     )
 
@@ -573,7 +579,7 @@ def main(page: ft.Page):
             color=NEON,
             text_style=ft.TextStyle(font_family="monospace", size=11),
             shape=ft.RoundedRectangleBorder(radius=0),
-            padding=ft.padding.symmetric(horizontal=24, vertical=14),
+            padding=ft.Padding(left=24, right=24, top=14, bottom=14),
         ),
     )
     btn1 = ft.TextButton(
@@ -583,15 +589,15 @@ def main(page: ft.Page):
             color=TEXT_DIM,
             text_style=ft.TextStyle(font_family="monospace", size=11),
             shape=ft.RoundedRectangleBorder(radius=0),
-            padding=ft.padding.symmetric(horizontal=24, vertical=14),
+            padding=ft.Padding(left=24, right=24, top=14, bottom=14),
         ),
     )
     tab_row = ft.Row([btn0, btn1], spacing=0)
 
     tab_bar = ft.Container(
         content=tab_row,
-        border=ft.border.only(bottom=ft.border.BorderSide(1, BORDER)),
-        padding=ft.padding.only(left=24),
+        border=ft.Border(bottom=ft.BorderSide(1, BORDER)),
+        padding=ft.Padding(left=24),
     )
 
     page.add(
@@ -606,6 +612,5 @@ def main(page: ft.Page):
         )
     )
 
-
 if __name__ == "__main__":
-    ft.app(target=main)
+    ft.run(main)

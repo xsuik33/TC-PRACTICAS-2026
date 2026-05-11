@@ -1,4 +1,11 @@
 import flet as ft
+import os
+from pathlib import Path
+
+# --- FUNCIÓN PARA REEMPLAZAR ft.border.all EN FLET 0.81.0+ ---
+def border_all(width: float, color: str):
+    side = ft.BorderSide(width, color)
+    return ft.Border(top=side, right=side, bottom=side, left=side)
 
 def main(page: ft.Page):
     page.title = "Practica 3 - Motor AFND | ESCOM IPN"
@@ -16,6 +23,7 @@ def main(page: ft.Page):
     
     lista_transiciones = ft.ListView(height=150, spacing=5)
     row_estados_activos = ft.Row(wrap=True)
+    lbl_status_guardado = ft.Text("", size=12, italic=True)
 
     def actualizar_vista_estados():
         row_estados_activos.controls.clear()
@@ -85,7 +93,37 @@ def main(page: ft.Page):
     def limpiar_todo(e):
         tabla_transiciones.clear()
         lista_transiciones.controls.clear()
+        lbl_status_guardado.value = ""
         reiniciar_simulacion(e)
+
+    # --- NUEVA FUNCIÓN PARA GUARDAR EL AFND ---
+    def guardar_afnd(e):
+        if not tabla_transiciones:
+            lbl_status_guardado.value = "⚠ No hay transiciones para guardar."
+            lbl_status_guardado.color = "orange"
+            page.update()
+            return
+
+        # Crea la carpeta 'exports' si no existe
+        out_dir = Path("./exports")
+        out_dir.mkdir(exist_ok=True)
+        path = out_dir / "mi_afnd.txt"
+
+        lineas = ["=== DEFINICIÓN DEL AFND ==="]
+        lineas.append("Transiciones registradas:")
+        for (origen, simbolo), destinos in tabla_transiciones.items():
+            # Formato: δ(q0, 1) ➔ {q0, q1}
+            lineas.append(f"δ({origen}, {simbolo}) ➔ {{{', '.join(destinos)}}}")
+
+        try:
+            path.write_text("\n".join(lineas), encoding="utf-8")
+            lbl_status_guardado.value = f"✓ Guardado con éxito en: {path.resolve()}"
+            lbl_status_guardado.color = "green"
+        except Exception as ex:
+            lbl_status_guardado.value = f"✗ Error al guardar: {ex}"
+            lbl_status_guardado.color = "red"
+        
+        page.update()
 
     # --- Controles de Simulación ---
     btn_agregar = ft.ElevatedButton("Agregar Transición", on_click=agregar_transicion, bgcolor="blue700", color="white")
@@ -93,6 +131,9 @@ def main(page: ft.Page):
     txt_entrada_simulacion = ft.TextField(label="Símbolo a evaluar", width=150)
     btn_paso = ft.FilledButton("Paso de Simulación", on_click=simular_paso, icon="play_arrow")
     btn_reiniciar = ft.ElevatedButton("Reiniciar", on_click=reiniciar_simulacion, icon="refresh")
+    
+    # Botones de control general
+    btn_guardar = ft.OutlinedButton("Guardar AFND", on_click=guardar_afnd, icon="save", icon_color="green")
     btn_limpiar = ft.OutlinedButton("Limpiar Todo", on_click=limpiar_todo, icon="delete", icon_color="red")
 
     # --- Layout Principal ---
@@ -103,11 +144,12 @@ def main(page: ft.Page):
         ft.Row([txt_origen, txt_simbolo, txt_destino, btn_agregar]),
         ft.Container(
             content=lista_transiciones,
-            border=ft.border.all(1, "white54"),
+            border=border_all(1, "white54"),
             border_radius=5,
             padding=10
         ),
-        ft.Row([btn_limpiar], alignment=ft.MainAxisAlignment.END),
+        ft.Row([btn_limpiar, btn_guardar], alignment=ft.MainAxisAlignment.END),
+        ft.Row([lbl_status_guardado], alignment=ft.MainAxisAlignment.END),
         
         ft.Divider(height=30, thickness=2, color="white24"),
         
@@ -119,4 +161,4 @@ def main(page: ft.Page):
 
     actualizar_vista_estados()
 
-ft.app(target=main)
+ft.run(main)

@@ -4,6 +4,11 @@ import re
 import os
 import traceback
 
+# --- FUNCIÓN DE APOYO PARA BORDES (Flet 0.81.0+) ---
+def border_all(width: float, color: str):
+    side = ft.BorderSide(width, color)
+    return ft.Border(top=side, right=side, bottom=side, left=side)
+
 # ==========================================
 # LÓGICA CORE: CADENAS Y AFD
 # ==========================================
@@ -30,7 +35,6 @@ class AFD:
         self.transitions = {}
 
     def validate_is_afd(self):
-        """Verifica que el autómata cargado sea un AFD válido (sin épsilon ni ambigüedad)"""
         for (frm, sym), to in self.transitions.items():
             if sym == "ε" or sym == "":
                 return False, f"Transición ε detectada en el estado {frm}. Es un AFND."
@@ -104,7 +108,7 @@ class AFD:
 # ==========================================
 
 def main(page: ft.Page):
-    page.title = "Práctica 4"
+    page.title = "Práctica 4 - Iker Saul"
     page.theme_mode = "dark"
     page.padding = 20
     
@@ -116,7 +120,7 @@ def main(page: ft.Page):
     col_resultados_cadenas = ft.Column(scroll="auto", expand=True)
 
     def chip(text, color, bg):
-        return ft.Container(content=ft.Text(text, font_family="monospace", size=13, color=color), bgcolor=bg, border_radius=6, padding=ft.padding.symmetric(horizontal=10, vertical=5))
+        return ft.Container(content=ft.Text(text, font_family="monospace", size=13, color=color), bgcolor=bg, border_radius=6, padding=ft.Padding(left=10, right=10, top=5, bottom=5))
 
     def calcular_cadenas(e):
         s = txt_cadena.value.strip()
@@ -143,8 +147,7 @@ def main(page: ft.Page):
     txt_alfabeto = ft.TextField(label="Alfabeto (ej: 0,1)", width=150)
     txt_inicial = ft.TextField(label="Inicial", width=100)
     txt_aceptacion = ft.TextField(label="Aceptación", width=150)
-    
-    txt_ruta_jff = ft.TextField(label="Ruta de tu archivo JFLAP (ej: C:/Users/tu_usuario/Desktop/auto.jff)", expand=True)
+    txt_ruta_jff = ft.TextField(label="Ruta de tu archivo JFLAP", expand=True)
     
     col_tabla_trans = ft.Column()
     trans_inputs = {}
@@ -194,28 +197,17 @@ def main(page: ft.Page):
 
     def cargar_jflap_manual(e):
         ruta = txt_ruta_jff.value.strip().replace('"', '').replace("'", "") 
-        if not ruta: 
-            page.snack_bar = ft.SnackBar(ft.Text("Por favor, ingresa una ruta primero", color="white"), bgcolor=DANGER)
+        if not ruta or not os.path.exists(ruta):
+            page.snack_bar = ft.SnackBar(ft.Text("Ruta no válida", color="white"), bgcolor=DANGER)
             page.snack_bar.open = True
             page.update()
             return
-            
-        if not os.path.exists(ruta):
-            page.snack_bar = ft.SnackBar(ft.Text("El archivo no existe. Revisa que la ruta sea correcta.", color="white"), bgcolor=DANGER)
-            page.snack_bar.open = True
-            page.update()
-            return
-            
         try:
             afd.from_jff(ruta)
-            valido, msg = afd.validate_is_afd()
-            if not valido: raise ValueError(msg)
             actualizar_ui_desde_memoria()
-            page.snack_bar = ft.SnackBar(ft.Text("✓ JFLAP Importado y Válido", color="white"), bgcolor="green")
+            page.snack_bar = ft.SnackBar(ft.Text("✓ JFLAP Importado", color="white"), bgcolor="green")
         except Exception as ex:
-            traceback.print_exc()
-            page.snack_bar = ft.SnackBar(ft.Text(f"Error al cargar: {ex}", color="white"), bgcolor=DANGER)
-            
+            page.snack_bar = ft.SnackBar(ft.Text(f"Error: {ex}", color="white"), bgcolor=DANGER)
         page.snack_bar.open = True
         page.update()
 
@@ -235,19 +227,14 @@ def main(page: ft.Page):
         ft.Text("1. Importación JFLAP (.jff)", size=20, weight="bold", color=ACCENT),
         ft.Row([txt_ruta_jff, ft.ElevatedButton("Cargar JFLAP", icon="upload_file", on_click=cargar_jflap_manual)]),
         ft.Divider(height=20, color="white24"),
-        
         ft.Text("2. Definición Manual / Vista de Tabla", size=20, weight="bold", color=ACCENT),
         ft.Row([txt_estados, txt_alfabeto, txt_inicial, txt_aceptacion], wrap=True),
-        ft.Row([
-            ft.ElevatedButton("Generar Tabla Manual", on_click=generar_tabla),
-            ft.ElevatedButton("Guardar AFD en Memoria", on_click=guardar_afd_memoria_btn, bgcolor="green", color="white")
-        ]), 
+        ft.Row([ft.ElevatedButton("Generar Tabla Manual", on_click=generar_tabla), ft.ElevatedButton("Guardar AFD", on_click=guardar_afd_memoria_btn, bgcolor="green", color="white")]), 
         col_tabla_trans,
         ft.Divider(height=20, color="white24"),
-        
-        ft.Text("3. Conversión a ER (Eliminación de Estados)", size=20, weight="bold", color=NEON),
+        ft.Text("3. Conversión a ER", size=20, weight="bold", color=NEON),
         ft.FilledButton("Convertir AFD a ER", on_click=convertir_a_er, bgcolor=NEON, color="black"),
-        ft.Container(content=col_pasos_er, border=ft.border.all(1, "white24"), padding=10, border_radius=5)
+        ft.Container(content=col_pasos_er, border=border_all(1, "white24"), padding=10, border_radius=5)
     ], scroll="auto"), padding=20)
 
     # --- TAB 3: AFND ---
@@ -283,110 +270,77 @@ def main(page: ft.Page):
     tab_afnd = ft.Container(content=ft.Column([
         ft.Text("Definición AFND", size=20, weight="bold"),
         ft.Row([txt_origen, txt_simb_afnd, txt_destino, ft.ElevatedButton("Agregar", on_click=add_trans_afnd)]),
-        ft.Container(content=lista_trans_afnd, border=ft.border.all(1, "white54"), padding=10), ft.Divider(),
+        ft.Container(content=lista_trans_afnd, border=border_all(1, "white54"), padding=10), ft.Divider(),
         ft.Text("Estados Activos:"), row_activos,
         ft.Row([txt_entrada_sim, ft.FilledButton("Paso", on_click=paso_afnd, icon="play_arrow")])
     ]), padding=20)
 
-    # --- TAB 4: VALIDATORES (PESTAÑAS PERSONALIZADAS SEGURAS) ---
-    validador_state = [0] # 0: Correo, 1: Telefono, 2: Fecha
-    
+    # --- TAB 4: VALIDATORES ---
+    validador_state = [0]
     txt_prueba_er = ft.TextField(label="Ingresa texto a validar", expand=True)
     lbl_er_info = ft.Text("", font_family="monospace", color=ACCENT)
     lbl_er_feedback = ft.Text("", weight="bold")
     row_visual_afd = ft.Row(scroll="auto", vertical_alignment=ft.CrossAxisAlignment.CENTER)
 
-    # Botones que simulan pestañas
     btn_tab_email = ft.ElevatedButton("1. Correo", bgcolor=PURPLE, color="white")
     btn_tab_tel = ft.ElevatedButton("2. Teléfono", bgcolor="#1A1A24", color="white")
     btn_tab_fecha = ft.ElevatedButton("3. Fecha", bgcolor="#1A1A24", color="white")
     
     def draw_afd_node(state, is_final=False):
-        return ft.Container(content=ft.Text(state, weight="bold"), width=50, height=50, border_radius=25, alignment=ft.Alignment.CENTER, border=ft.border.all(2, NEON if is_final else ACCENT), bgcolor="#1A1A24")
+        return ft.Container(content=ft.Text(state, weight="bold"), width=50, height=50, border_radius=25, alignment=ft.Alignment.CENTER, border=border_all(2, NEON if is_final else ACCENT), bgcolor="#1A1A24")
     
     def draw_afd_transition(label):
         return ft.Row([ft.Text("─"), ft.Text(label, size=12, color=PURPLE), ft.Text("→")], spacing=0)
 
     def on_validador_tab_change(idx):
         validador_state[0] = idx
-        
-        # Cambiar colores de las "pestañas"
         btn_tab_email.bgcolor = PURPLE if idx == 0 else "#1A1A24"
         btn_tab_tel.bgcolor = PURPLE if idx == 1 else "#1A1A24"
         btn_tab_fecha.bgcolor = PURPLE if idx == 2 else "#1A1A24"
-        
         row_visual_afd.controls.clear()
-        
         if idx == 0:
             lbl_er_info.value, nodos = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$", [("q0", "[a-z]"), ("q1", "@"), ("q2", "[a-z]"), ("q3", "."), ("q4", "Final")]
         elif idx == 1:
             lbl_er_info.value, nodos = "^\\d{10}$", [("q0", "\\d"), ("q1", "..."), ("q9", "\\d"), ("q10", "Final")]
         elif idx == 2:
             lbl_er_info.value, nodos = "^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\\d{4}$", [("q0", "Día"), ("q1", "/"), ("q2", "Mes"), ("q3", "/"), ("q4", "Final")]
-            
         for i, (q, t) in enumerate(nodos):
             row_visual_afd.controls.append(draw_afd_node(q, is_final=(i==len(nodos)-1)))
             if i < len(nodos)-1: row_visual_afd.controls.append(draw_afd_transition(t))
-            
-        lbl_er_feedback.value = ""
-        txt_prueba_er.value = ""
+        lbl_er_feedback.value, txt_prueba_er.value = "", ""
         page.update()
 
-    # Asignar los eventos a los botones-pestaña
     btn_tab_email.on_click = lambda _: on_validador_tab_change(0)
     btn_tab_tel.on_click = lambda _: on_validador_tab_change(1)
     btn_tab_fecha.on_click = lambda _: on_validador_tab_change(2)
 
     def probar_regex(e):
-        texto, valido, sugerencia = txt_prueba_er.value.strip(), False, ""
-        idx = validador_state[0]
-        
-        if idx == 0:
-            patron = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-            valido = re.match(patron, texto)
-            if not valido: sugerencia = "Falta '@' o dominio"
-        elif idx == 1:
-            patron = r"^\d{10}$"
-            valido = re.match(patron, texto)
-            if not valido: sugerencia = "Deben ser 10 dígitos"
-        elif idx == 2:
-            patron = r"^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}$"
-            valido = re.match(patron, texto)
-            if not valido: sugerencia = "Formato DD/MM/YYYY"
-            
-        lbl_er_feedback.value = "✓ VÁLIDA" if valido else f"✗ INVÁLIDA: {sugerencia}"
+        texto, idx = txt_prueba_er.value.strip(), validador_state[0]
+        patrones = [r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$", r"^\d{10}$", r"^(0[1-9]|[12][0-9]|3[01])/(0[1-9]|1[0-2])/\d{4}$"]
+        valido = re.match(patrones[idx], texto)
+        lbl_er_feedback.value = "✓ VÁLIDA" if valido else "✗ INVÁLIDA"
         lbl_er_feedback.color = "green" if valido else DANGER
         page.update()
 
-    txt_prueba_er.on_submit = probar_regex
-
     tab_regex = ft.Container(content=ft.Column([
         ft.Text("Validadores Prácticos", size=20, weight="bold", color=PURPLE),
-        ft.Row([btn_tab_email, btn_tab_tel, btn_tab_fecha]), # Menú de Pestañas Personalizado
+        ft.Row([btn_tab_email, btn_tab_tel, btn_tab_fecha]),
         ft.Container(content=lbl_er_info, padding=10, bgcolor="white10", border_radius=5),
-        ft.Text("Estructura AFD (Desliza si es necesario):", color=ACCENT, weight="bold"),
-        ft.Container(content=row_visual_afd, padding=10, border=ft.border.all(1, "white24"), border_radius=5),
+        ft.Text("Estructura AFD:", color=ACCENT, weight="bold"),
+        ft.Container(content=row_visual_afd, padding=10, border=border_all(1, "white24"), border_radius=5),
         ft.Row([txt_prueba_er, ft.ElevatedButton("Validar", on_click=probar_regex, bgcolor=PURPLE, color="white")]), 
         lbl_er_feedback
     ]), padding=20)
 
-    update_activos()
-    on_validador_tab_change(0) # Iniciar en la pestaña de Correo
     content_area = ft.Container(content=tab_cadenas, expand=True)
-
     def switch_tab(index):
-        vistas = [tab_cadenas, tab_afd, tab_afnd, tab_regex]
-        content_area.content = vistas[index]
+        content_area.content = [tab_cadenas, tab_afd, tab_afnd, tab_regex][index]
         page.update()
 
-    nav_bar = ft.Row([
-        ft.ElevatedButton("1. Cadenas", on_click=lambda _: switch_tab(0), bgcolor=PURPLE),
-        ft.ElevatedButton("2. AFD & ER", on_click=lambda _: switch_tab(1), bgcolor=ACCENT),
-        ft.ElevatedButton("3. AFND", on_click=lambda _: switch_tab(2), bgcolor="blue700"),
-        ft.ElevatedButton("4. Validadores", on_click=lambda _: switch_tab(3), bgcolor=NEON, color="black"),
-    ], alignment=ft.MainAxisAlignment.CENTER, wrap=True)
+    page.add(ft.Column([
+        ft.Row([ft.ElevatedButton("1. Cadenas", on_click=lambda _: switch_tab(0), bgcolor=PURPLE), ft.ElevatedButton("2. AFD & ER", on_click=lambda _: switch_tab(1), bgcolor=ACCENT), ft.ElevatedButton("3. AFND", on_click=lambda _: switch_tab(2), bgcolor="blue700"), ft.ElevatedButton("4. Validadores", on_click=lambda _: switch_tab(3), bgcolor=NEON, color="black")], alignment=ft.MainAxisAlignment.CENTER, wrap=True),
+        ft.Divider(height=10, color="white24"), content_area
+    ], expand=True))
+    on_validador_tab_change(0)
 
-    page.add(ft.Column([nav_bar, ft.Divider(height=10, color="white24"), content_area], expand=True))
-
-if __name__ == "__main__":
-    ft.app(target=main)
+ft.run(main)
