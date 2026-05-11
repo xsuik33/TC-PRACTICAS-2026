@@ -6,7 +6,7 @@ Este repositorio contiene las prácticas de laboratorio desarrolladas para la un
 El proyecto está diseñado para ejecutarse en entornos virtuales aislados, garantizando que no se realicen modificaciones en la instalación global de Python del sistema y asegurando la portabilidad entre diferentes plataformas.
 
 ## Requisitos Previos
-* Python 3.10 o superior.
+* Python 3.10 o superior (Se uso 3.14.3).
 * Gestor de paquetes `pip`.
 * Módulo `venv` (incluido por defecto en instalaciones estándar de Python).
 
